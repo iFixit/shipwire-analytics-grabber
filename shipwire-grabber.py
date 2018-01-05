@@ -16,8 +16,8 @@ shipwire = Shipwire(
             host='api.shipwire.com')
 
 def get_orders(updated_after):
-    res = shipwire.orders.list(updatedAfter=updated_after.isoformat(), expand="items")
-    return map(lambda item: item['resource'], res.all())
+    res = shipwire.orders.list(completedAfter=updated_after.isoformat(), expand="items")
+    return list(map(lambda item: item['resource'], res.all()))
 
 def get_stock():
     res = shipwire.stock.products()
