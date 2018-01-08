@@ -8,6 +8,7 @@ from pymongo import MongoClient
 yesterday = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(days=1),
                 datetime.time.min)
+today = yesterday + datetime.timedelta(days=1)
 
 mongo = MongoClient(os.environ['MONGODB_URI'])
 shipwire = Shipwire(
@@ -15,8 +16,12 @@ shipwire = Shipwire(
             os.environ['SHIPWIRE_PASSWORD'],
             host='api.shipwire.com')
 
-def get_orders(updated_after):
-    res = shipwire.orders.list(completedAfter=updated_after.isoformat(), expand="items")
+def get_orders(start_date, stop_date):
+    res = shipwire.orders.list(
+            completedAfter=start_date.astimezone().isoformat(),
+            completedBefore=stop_date.astimezone().isoformat(),
+            expand="items")
+
     return list(map(lambda item: item['resource'], res.all()))
 
 def get_stock():
@@ -31,7 +36,7 @@ def get_stock():
 orders_collection = mongo.warehouse.shipwire_orders
 stock_collection = mongo.warehouse.shipwire_stock
 
-for order in get_orders(yesterday):
+for order in get_orders(yesterday, today):
     orders_collection.save(order)
 
 for stock in get_stock():
