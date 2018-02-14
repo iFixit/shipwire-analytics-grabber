@@ -58,7 +58,6 @@ def clean_order(order):
 
     def convert_dates(doc):
         """Converts ISO8601 time strings to Datetime objects for MongoDB"""
-        print(doc['events'])
         for date in doc['events']:
             doc['events'][date] = iso8601.parse_date(doc['events'][date])
 
