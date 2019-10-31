@@ -23,6 +23,7 @@ shipwire = Shipwire(
 
 def get_orders(start_date, stop_date):
     res = shipwire.orders.list(
+            json=None,
             completedAfter=start_date.astimezone(mst).isoformat(),
             completedBefore=stop_date.astimezone(mst).isoformat(),
             expand="items")
@@ -30,7 +31,7 @@ def get_orders(start_date, stop_date):
     return list(map(lambda item: item['resource'], res.all()))
 
 def get_stock():
-    res = shipwire.stock.products()
+    res = shipwire.stock.products(json=None)
     stock = list(map(lambda item: item['resource'], res.all()))
 
     for product in stock:
