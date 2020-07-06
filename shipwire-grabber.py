@@ -19,7 +19,8 @@ mongo = MongoClient(os.environ['MONGODB_URI'])
 shipwire = Shipwire(
             os.environ['SHIPWIRE_USER'],
             os.environ['SHIPWIRE_PASSWORD'],
-            host='api.shipwire.com')
+            host='api.shipwire.com',
+            raise_on_errors=True)
 
 def get_orders(start_date, stop_date):
     res = shipwire.orders.list(
