@@ -7,11 +7,18 @@ import json
 
 from shipwire import Shipwire
 from pymongo import MongoClient
+from os import environ
+
+RUN_DATE = "RUN_FOR_DATE"
 
 mst = pytz.timezone("America/Phoenix")
 now = datetime.datetime.now(tz=mst)
 
-today = now.date()
+if RUN_DATE in environ:
+    today = datetime.date.fromisoformat(environ[RUN_DATE])
+else:
+    today = now.date()
+
 yesterday = datetime.datetime.combine(today - datetime.timedelta(days=1), datetime.time.min)
 today = datetime.datetime.combine(yesterday + datetime.timedelta(days=1), datetime.time.min)
 
