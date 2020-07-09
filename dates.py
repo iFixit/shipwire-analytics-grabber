@@ -8,11 +8,9 @@ def get_run_dates():
         raise RuntimeError("Expected variable {} in environment".format(RUN_DATE))
     today = datetime.date.fromisoformat(environ[RUN_DATE])
 
-    yesterday = datetime.datetime.combine(
-        today - datetime.timedelta(days=1), datetime.time.min
-    )
-    today = datetime.datetime.combine(
-        yesterday + datetime.timedelta(days=1), datetime.time.min
+    start_time = datetime.datetime.combine(today, datetime.time.min)
+    end_time = datetime.datetime.combine(
+        start_time + datetime.timedelta(days=1), datetime.time.min
     )
 
-    return (yesterday, today)
+    return (start_time, end_time)
