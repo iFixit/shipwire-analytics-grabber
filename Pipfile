@@ -1,0 +1,24 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+isort = "*"
+mypy = "*"
+black = "*"
+
+[packages]
+certifi = "==2019.9.11"
+chardet = "==3.0.4"
+idna = "==2.8"
+iso8601 = "==0.1.12"
+pymongo = "==3.9.0"
+pytz = "==2019.3"
+requests = "==2.22.0"
+shipwire = "==0.9.1"
+urllib3 = "==1.25.6"
+
+[requires]
+python_version = "3.8"
