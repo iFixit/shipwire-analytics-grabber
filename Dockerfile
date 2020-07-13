@@ -9,6 +9,7 @@ WORKDIR  /opt/shipwire-analytics-grabber
 # Install python project, install modules
 RUN      python3 -m ensurepip \
           && pip3 install --upgrade pip \
-          && pip3 install -r requirements.txt
+          && pip3 install pipenv \
+          && pipenv install --system
 
 ENTRYPOINT python3 shipwire-grabber.py
