@@ -7,7 +7,13 @@ import pytz
 from pymongo import MongoClient
 from shipwire import Shipwire
 
+import logging
+
 from dates import get_run_dates
+
+logging.basicConfig()
+log = logging.getLogger("Shipwire Grabber")
+log.setLevel(logging.INFO)
 
 mst = pytz.timezone("America/Phoenix")
 
@@ -77,8 +83,12 @@ def clean_order(order):
 orders_collection = mongo.warehouse.shipwire_orders
 stock_collection = mongo.warehouse.shipwire_stock
 
-for order in get_orders(yesterday, today):
+orders = get_orders(yesterday, today)
+log.info("Found %d orders", len(orders))
+for order in orders:
     orders_collection.save(clean_order(order))
 
-for stock in get_stock():
+stocks = get_stock()
+log.info("Found %d stock values", len(stocks))
+for stock in stocks:
     stock_collection.save(stock)
