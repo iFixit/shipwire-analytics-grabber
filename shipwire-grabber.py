@@ -1,51 +1,55 @@
 #!/usr/bin/env python3
-import os
-import datetime
-import pytz
-import iso8601
 import json
+import os
 
-from shipwire import Shipwire
+import iso8601
+import pytz
 from pymongo import MongoClient
+from shipwire import Shipwire
+
+from dates import get_run_dates
 
 mst = pytz.timezone("America/Phoenix")
-now = datetime.datetime.now(tz=mst)
 
-today = now.date()
-yesterday = datetime.datetime.combine(today - datetime.timedelta(days=1), datetime.time.min)
-today = datetime.datetime.combine(yesterday + datetime.timedelta(days=1), datetime.time.min)
+yesterday, today = get_run_dates()
 
-mongo = MongoClient(os.environ['MONGODB_URI'])
+mongo = MongoClient(os.environ["MONGODB_URI"])
 shipwire = Shipwire(
-            os.environ['SHIPWIRE_USER'],
-            os.environ['SHIPWIRE_PASSWORD'],
-            host='api.shipwire.com')
+    os.environ["SHIPWIRE_USER"],
+    os.environ["SHIPWIRE_PASSWORD"],
+    host="api.shipwire.com",
+    raise_on_errors=True,
+)
+
 
 def get_orders(start_date, stop_date):
     res = shipwire.orders.list(
-            json=None,
-            completedAfter=start_date.astimezone(mst).isoformat(),
-            completedBefore=stop_date.astimezone(mst).isoformat(),
-            expand="items")
+        json=None,
+        completedAfter=start_date.astimezone(mst).isoformat(),
+        completedBefore=stop_date.astimezone(mst).isoformat(),
+        expand="items",
+    )
 
-    return list(map(lambda item: item['resource'], res.all()))
+    return list(map(lambda item: item["resource"], res.all()))
+
 
 def get_stock():
     res = shipwire.stock.products(json=None)
-    stock = list(map(lambda item: item['resource'], res.all()))
+    stock = list(map(lambda item: item["resource"], res.all()))
 
     for product in stock:
-        product['date'] = yesterday
+        product["date"] = yesterday
 
     return stock
+
 
 def clean_order(order):
     def clean_tree(doc):
         """Takes a document and recursively flattens "resource" objects"""
-        if 'resource' in doc:
-            return clean_tree(doc['resource'])
+        if "resource" in doc:
+            return clean_tree(doc["resource"])
 
-        if 'resourceLocation' in doc:
+        if "resourceLocation" in doc:
             return None
 
         if type(doc) is dict:
@@ -59,15 +63,16 @@ def clean_order(order):
 
     def convert_dates(doc):
         """Converts ISO8601 time strings to Datetime objects for MongoDB"""
-        for date in doc['events']:
-            doc['events'][date] = iso8601.parse_date(doc['events'][date])
+        for date in doc["events"]:
+            doc["events"][date] = iso8601.parse_date(doc["events"][date])
 
-        doc['lastUpdatedDate'] = iso8601.parse_date(doc['lastUpdatedDate'])
-        doc['processAfterDate'] = iso8601.parse_date(doc['processAfterDate'])
+        doc["lastUpdatedDate"] = iso8601.parse_date(doc["lastUpdatedDate"])
+        doc["processAfterDate"] = iso8601.parse_date(doc["processAfterDate"])
 
         return doc
 
     return convert_dates(clean_tree(order))
+
 
 orders_collection = mongo.warehouse.shipwire_orders
 stock_collection = mongo.warehouse.shipwire_stock
