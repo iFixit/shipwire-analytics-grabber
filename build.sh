@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-docker build -t "shipwire-analytics-grabber:${TAG:-latest}" .
+docker build -t "shipwire-analytics-grabber:${TAG:-testing}" .

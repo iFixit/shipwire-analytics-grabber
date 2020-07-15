@@ -7,4 +7,4 @@ docker run \
  --env-file .env \
  -v /etc/hosts:/etc/hosts \
  $@ \
- shipwire-analytics-grabber:"$TAG"
+ shipwire-analytics-grabber:"${TAG:-testing}"
