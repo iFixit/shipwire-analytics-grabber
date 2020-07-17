@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import logging
 import os
 
 import iso8601
@@ -7,15 +8,11 @@ import pytz
 from pymongo import MongoClient
 from shipwire import Shipwire
 
-import logging
-
-from dates import get_run_dates
+from dates import get_run_dates, get_yesterday, mst
 
 logging.basicConfig()
 log = logging.getLogger("Shipwire Grabber")
 log.setLevel(logging.INFO)
-
-mst = pytz.timezone("America/Phoenix")
 
 start_time, end_time = get_run_dates()
 
@@ -44,7 +41,7 @@ def get_stock():
     stock = list(map(lambda item: item["resource"], res.all()))
 
     for product in stock:
-        product["date"] = yesterday
+        product["date"] = get_yesterday()
 
     return stock
 
@@ -88,7 +85,12 @@ log.info("Found %d orders", len(orders))
 for order in orders:
     orders_collection.save(clean_order(order))
 
-stocks = get_stock()
-log.info("Found %d stock values", len(stocks))
-for stock in stocks:
-    stock_collection.save(stock)
+
+# This isn't 100% reliable, but should be safe enough in Airflow.  It
+# keeps the stock from getting updated during backfills, as the stock
+# data isn't backfillable.
+if start_time == get_yesterday():
+    stocks = get_stock()
+    log.info("Found %d stock values", len(stocks))
+    for stock in stocks:
+        stock_collection.save(stock)
