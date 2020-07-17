@@ -17,7 +17,7 @@ log.setLevel(logging.INFO)
 
 mst = pytz.timezone("America/Phoenix")
 
-yesterday, today = get_run_dates()
+start_time, end_time = get_run_dates()
 
 mongo = MongoClient(os.environ["MONGODB_URI"])
 shipwire = Shipwire(
@@ -83,7 +83,7 @@ def clean_order(order):
 orders_collection = mongo.warehouse.shipwire_orders
 stock_collection = mongo.warehouse.shipwire_stock
 
-orders = get_orders(yesterday, today)
+orders = get_orders(start_time, end_time)
 log.info("Found %d orders", len(orders))
 for order in orders:
     orders_collection.save(clean_order(order))
